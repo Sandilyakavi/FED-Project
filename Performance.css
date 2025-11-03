@@ -1,0 +1,38 @@
+/* src/pages/Performance.css */
+
+.performance-page {
+  padding: 2rem;
+  color: #222;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.performance-page.dark {
+  background-color: #121212;
+  color: #f1f1f1;
+}
+
+.stats-container {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 2rem;
+}
+
+.perf-card {
+  background: var(--perf-bg, #fff);
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.performance-page.dark .perf-card {
+  --perf-bg: #1f1f1f;
+}
+
+.perf-card:hover {
+  transform: translateY(-5px);
+}
