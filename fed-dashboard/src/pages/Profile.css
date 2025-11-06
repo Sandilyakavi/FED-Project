@@ -1,0 +1,45 @@
+.profile-container {
+  max-width: 500px;
+  margin: 50px auto;
+  background: #f9f9f9;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.profile-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #0d2840;
+}
+
+.profile-card label {
+  font-weight: bold;
+  margin-top: 10px;
+  display: block;
+  color: #333;
+}
+
+.profile-card p, .profile-card input {
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.edit-btn {
+  display: block;
+  width: 100%;
+  background: #0d2840;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.edit-btn:hover {
+  background: #154c79;
+}

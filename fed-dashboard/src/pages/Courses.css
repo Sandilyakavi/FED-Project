@@ -1,0 +1,77 @@
+.courses-container {
+  padding: 20px;
+}
+
+.courses-container h2 {
+  font-size: 1.6rem;
+  color: #2d6a4f;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.courses-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.course-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 128, 0, 0.2);
+}
+
+.course-card h3 {
+  color: #1b4332;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.course-card p {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.progress-bar {
+  background: #e9ecef;
+  border-radius: 8px;
+  height: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #2d6a4f, #74c69d);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+button {
+  background-color: #2d6a4f;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #1b4332;
+}
