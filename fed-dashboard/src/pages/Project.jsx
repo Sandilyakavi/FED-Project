@@ -1,43 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
+import Sidebar from "../components/Sidebar";
 import "./Project.css";
 
-const projects = [
-  {
-    id: 1,
-    title: "AI Vehicle Detection",
-    description: "A real-time vehicle detection system using YOLOv8 and OpenCV.",
-    progress: 80,
-  },
-  {
-    id: 2,
-    title: "Student Management Portal",
-    description: "A MERN stack app for managing student records and performance.",
-    progress: 65,
-  },
-  {
-    id: 3,
-    title: "Smart Farming Dashboard",
-    description: "IoT-based crop monitoring dashboard with live sensor data.",
-    progress: 90,
-  },
-];
-
 const Project = () => {
+  const [projects] = useState([
+    {
+      id: 1,
+      title: "Solar Panel Tracker",
+      description: "A real-time dashboard to monitor solar panel output.",
+      status: "In Progress",
+      pdf: "/pdfs/solar.pdf",
+    },
+    {
+      id: 2,
+      title: "Community Recycling App",
+      description: "An app to encourage recycling practices in neighborhoods.",
+      status: "Completed",
+      pdf: "/pdfs/community.pdf",
+    },
+    {
+      id: 3,
+      title: "Water Conservation Platform",
+      description: "Online community forum for water-saving tips and projects.",
+      status: "Planned",
+      pdf: "/pdfs/energy.pdf",
+    },
+  ]);
+
+  const handleViewPDF = (pdfPath) => {
+    window.open(pdfPath, "_blank", "noopener,noreferrer");
+  };
+
   return (
-    <div className="project-page">
-      <h1 className="project-title">Your Projects</h1>
-      <div className="project-grid">
-        {projects.map((proj) => (
-          <div key={proj.id} className="project-card">
-            <h2>{proj.title}</h2>
-            <p>{proj.description}</p>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${proj.progress}%` }}
-              ></div>
-            </div>
-            <button className="view-btn">View Details</button>
+    <div className="projects-container">
+      <h2>🚀 Projects</h2>
+      <div className="projects-grid">
+        {projects.map((project) => (
+          <div key={project.id} className="project-card">
+            <h3>{project.title}</h3>
+            <p>{project.description}</p>
+            <p className="project-status">Status: {project.status}</p>
+            <button
+              className="view-pdf-btn"
+              onClick={() => handleViewPDF(project.pdf)}
+            >
+              View PDF
+            </button>
           </div>
         ))}
       </div>

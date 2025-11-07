@@ -21,7 +21,7 @@ function App() {
         {/* Dashboard routes */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<Courses />} />
-        <Route path="/projects" element={<Project />} />
+        <Route path="/project" element={<Project />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/performance" element={<Performance />} />
       </Routes>

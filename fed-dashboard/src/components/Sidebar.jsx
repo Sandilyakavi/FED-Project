@@ -19,7 +19,7 @@ const Sidebar = () => {
         </li>
 
         <li className={location.pathname === "/projects" ? "active" : ""}>
-          <Link to="/projects">🚀 Projects</Link>
+          <Link to="/projects">🚀 Project</Link>
         </li>
 
         <li className={location.pathname === "/performance" ? "active" : ""}>
