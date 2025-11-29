@@ -1,6 +1,6 @@
 // src/utils/auth.js
 
-// Register a new user
+// Register a new user and store in localStorage
 export const registerUser = (username, email, password) => {
   try {
     const existing = JSON.parse(localStorage.getItem("userAccount") || "null");
@@ -19,15 +19,17 @@ export const registerUser = (username, email, password) => {
       id: Date.now(),
       username,
       email,
-      password, // For real apps, never store plain passwords.
+      password, // For production, hash this.
       createdAt: new Date().toISOString(),
     };
 
+    // Persist main account data
     localStorage.setItem("userAccount", JSON.stringify(newUser));
+    // Mark authenticated
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("isAuthenticated", "true");
 
-    // Display user data for dashboard
+    // Lightweight display info for dashboard
     localStorage.setItem(
       "user",
       JSON.stringify({
@@ -50,7 +52,7 @@ export const registerUser = (username, email, password) => {
   }
 };
 
-// Login existing user
+// Login with username + password
 export const loginUser = (username, password) => {
   try {
     const stored = JSON.parse(localStorage.getItem("userAccount") || "null");
@@ -94,20 +96,17 @@ export const loginUser = (username, password) => {
   }
 };
 
-// Logout user
+// Logout: keep account, only clear session flags + current user
 export const logoutUser = () => {
   try {
-    // Remove only auth-related keys so course/project/task data can stay
     const keysToRemove = [
       "isLoggedIn",
       "isAuthenticated",
-      "userAccount",
       "user",
       "userData",
     ];
-
     keysToRemove.forEach((key) => localStorage.removeItem(key));
-
+    // DO NOT remove "userAccount" so signup persists
     return { success: true };
   } catch (err) {
     console.error("logoutUser error:", err);
@@ -115,7 +114,7 @@ export const logoutUser = () => {
   }
 };
 
-// Check auth status
+// Check whether user is authenticated
 export const isAuthenticated = () => {
   return (
     localStorage.getItem("isLoggedIn") === "true" ||
@@ -123,36 +122,35 @@ export const isAuthenticated = () => {
   );
 };
 
-// Get current user object
+// Get current display user (for header/dashboard)
 export const getCurrentUser = () => {
   try {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    return user;
+    return JSON.parse(localStorage.getItem("user") || "null");
   } catch {
     return null;
   }
 };
 
-// Update profile data (optional helper for Profile page)
+// Optional: update profile (used by Profile page)
 export const updateUserProfile = (profileData) => {
   try {
-    const stored = JSON.parse(localStorage.getItem("userAccount") || "null");
-    if (!stored) {
+    const account = JSON.parse(localStorage.getItem("userAccount") || "null");
+    if (!account) {
       return { success: false, message: "No user found." };
     }
 
-    const updated = {
-      ...stored,
-      username: profileData.name || stored.username,
-      email: profileData.email || stored.email,
+    const updatedAccount = {
+      ...account,
+      username: profileData.name || account.username,
+      email: profileData.email || account.email,
     };
 
-    localStorage.setItem("userAccount", JSON.stringify(updated));
+    localStorage.setItem("userAccount", JSON.stringify(updatedAccount));
     localStorage.setItem(
       "user",
       JSON.stringify({
-        name: updated.username,
-        email: updated.email,
+        name: updatedAccount.username,
+        email: updatedAccount.email,
       })
     );
     localStorage.setItem("userData", JSON.stringify(profileData));

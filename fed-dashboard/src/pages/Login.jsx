@@ -63,6 +63,7 @@ const Login = () => {
           return;
         }
 
+        // Display user for dashboard
         localStorage.setItem(
           "user",
           JSON.stringify({ name: formData.username, email: formData.email })

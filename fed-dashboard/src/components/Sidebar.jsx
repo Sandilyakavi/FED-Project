@@ -1,15 +1,11 @@
 // src/components/Sidebar.jsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { logoutUser } from "../utils/auth";
 import "./Sidebar.css";
 
 const Sidebar = ({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen }) => {
   const location = useLocation();
-
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = "/";
-  };
 
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: "🏠" },
@@ -19,6 +15,12 @@ const Sidebar = ({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen }) => {
     { path: "/tasks", label: "Tasks", icon: "📋" },
     { path: "/profile", label: "Profile", icon: "💼" },
   ];
+
+  const handleLogout = () => {
+    logoutUser();
+    setSidebarOpen(false);
+    window.location.href = "/";
+  };
 
   return (
     <>
@@ -31,10 +33,11 @@ const Sidebar = ({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen }) => {
       <aside className={`sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="sidebar-header">
           <h2 className="sidebar-logo">🌱 FED Dashboard</h2>
+
           <button
             className="theme-toggle"
             onClick={() => setDarkMode((prev) => !prev)}
-            title="Toggle dark mode"
+            title="Toggle theme"
           >
             {darkMode ? "☀️" : "🌙"}
           </button>
@@ -46,13 +49,15 @@ const Sidebar = ({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen }) => {
               <li
                 key={item.path}
                 className={
-                  location.pathname === item.path ? "nav-item active" : "nav-item"
+                  location.pathname === item.path
+                    ? "nav-item active"
+                    : "nav-item"
                 }
               >
                 <Link
                   to={item.path}
-                  onClick={() => setSidebarOpen(false)}
                   className="nav-link"
+                  onClick={() => setSidebarOpen(false)}
                 >
                   <span className="nav-icon">{item.icon}</span>
                   <span className="nav-label">{item.label}</span>
@@ -68,16 +73,6 @@ const Sidebar = ({ darkMode, setDarkMode, sidebarOpen, setSidebarOpen }) => {
           </button>
         </div>
       </aside>
-
-      {/* Mobile hamburger (optional, place in layout header if needed) */}
-      {/* 
-      <button
-        className="sidebar-toggle-btn"
-        onClick={() => setSidebarOpen((prev) => !prev)}
-      >
-        ☰
-      </button>
-      */}
     </>
   );
 };
