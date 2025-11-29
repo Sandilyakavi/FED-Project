@@ -4,7 +4,7 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import "./Profile.css";
 
 const Profile = () => {
-  // Base account from auth
+  // Base account of currently logged‑in user
   const baseAccount = (() => {
     try {
       return JSON.parse(localStorage.getItem("userAccount") || "null");
@@ -13,6 +13,7 @@ const Profile = () => {
     }
   })();
 
+  // Separate profile key per username
   const profileKey = baseAccount
     ? `userData_${baseAccount.username}`
     : "userData";
@@ -34,7 +35,7 @@ const Profile = () => {
   const [originalData, setOriginalData] = useState(formData);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize from localStorage or defaults based on current user
+  // Initialize once on mount
   useEffect(() => {
     const displayUser = (() => {
       try {
@@ -45,6 +46,7 @@ const Profile = () => {
     })();
 
     if (storedProfile) {
+      // Merge latest login name/email into stored profile
       const merged = {
         ...storedProfile,
         name: displayUser?.name || storedProfile.name,
@@ -52,7 +54,6 @@ const Profile = () => {
       };
       setFormData(merged);
       setOriginalData(merged);
-      setStoredProfile(merged);
       return;
     }
 
@@ -70,7 +71,8 @@ const Profile = () => {
     setFormData(defaultData);
     setOriginalData(defaultData);
     setStoredProfile(defaultData);
-  }, [storedProfile, setStoredProfile, baseAccount]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -92,16 +94,19 @@ const Profile = () => {
     setTimeout(() => {
       setStoredProfile(formData);
 
-      // also sync back to generic keys used elsewhere
+      // sync basic name/email to auth data
       try {
+        const currentAccount = baseAccount || {};
         const updatedAccount = {
-          ...(baseAccount || {}),
-          username: formData.name || baseAccount?.username,
-          email: formData.email || baseAccount?.email,
+          ...currentAccount,
+          username: formData.name || currentAccount.username,
+          email: formData.email || currentAccount.email,
         };
+
         if (baseAccount) {
           localStorage.setItem("userAccount", JSON.stringify(updatedAccount));
         }
+
         localStorage.setItem(
           "user",
           JSON.stringify({
@@ -110,7 +115,7 @@ const Profile = () => {
           })
         );
       } catch {
-        // ignore
+        // ignore sync errors
       }
 
       setEditing(false);

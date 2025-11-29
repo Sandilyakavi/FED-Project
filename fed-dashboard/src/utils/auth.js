@@ -1,14 +1,16 @@
 // src/utils/auth.js
 
-// Register a new user and store in localStorage
+// Register a new user and store in an array `userAccounts`
 export const registerUser = (username, email, password) => {
   try {
-    const existing = JSON.parse(localStorage.getItem("userAccount") || "null");
+    const raw = localStorage.getItem("userAccounts");
+    const existingList = raw ? JSON.parse(raw) : [];
 
-    if (
-      existing &&
-      (existing.username === username || existing.email === email)
-    ) {
+    // Check if username or email already exists
+    const exists = existingList.find(
+      (u) => u.username === username || u.email === email
+    );
+    if (exists) {
       return {
         success: false,
         message: "Account already exists with this username or email.",
@@ -19,24 +21,23 @@ export const registerUser = (username, email, password) => {
       id: Date.now(),
       username,
       email,
-      password, // For production, hash this.
+      password, // For real apps: hash this.
       createdAt: new Date().toISOString(),
     };
 
-    // Persist main account data
-    localStorage.setItem("userAccount", JSON.stringify(newUser));
-    // Mark authenticated
+    const updatedList = [...existingList, newUser];
+    localStorage.setItem("userAccounts", JSON.stringify(updatedList));
+
+    // Mark new user as logged in
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("isAuthenticated", "true");
 
-    // Lightweight display info for dashboard
+    // Current session user
     localStorage.setItem(
       "user",
-      JSON.stringify({
-        name: username,
-        email,
-      })
+      JSON.stringify({ name: username, email })
     );
+    localStorage.setItem("userAccount", JSON.stringify(newUser)); // convenience: last used account
 
     return {
       success: true,
@@ -52,19 +53,22 @@ export const registerUser = (username, email, password) => {
   }
 };
 
-// Login with username + password
+// Login existing user from `userAccounts`
 export const loginUser = (username, password) => {
   try {
-    const stored = JSON.parse(localStorage.getItem("userAccount") || "null");
+    const raw = localStorage.getItem("userAccounts");
+    const accounts = raw ? JSON.parse(raw) : [];
 
-    if (!stored) {
+    if (!accounts.length) {
       return {
         success: false,
         message: "No account found. Please create one first.",
       };
     }
 
-    if (stored.username !== username || stored.password !== password) {
+    const user = accounts.find((u) => u.username === username);
+
+    if (!user || user.password !== password) {
       return {
         success: false,
         message: "Invalid username or password.",
@@ -76,16 +80,14 @@ export const loginUser = (username, password) => {
 
     localStorage.setItem(
       "user",
-      JSON.stringify({
-        name: stored.username,
-        email: stored.email,
-      })
+      JSON.stringify({ name: user.username, email: user.email })
     );
+    localStorage.setItem("userAccount", JSON.stringify(user));
 
     return {
       success: true,
       message: "Login successful!",
-      user: { name: stored.username, email: stored.email },
+      user: { name: user.username, email: user.email },
     };
   } catch (err) {
     console.error("loginUser error:", err);
@@ -96,7 +98,7 @@ export const loginUser = (username, password) => {
   }
 };
 
-// Logout: keep account, only clear session flags + current user
+// Logout: clear session data but keep all accounts in `userAccounts`
 export const logoutUser = () => {
   try {
     const keysToRemove = [
@@ -104,9 +106,10 @@ export const logoutUser = () => {
       "isAuthenticated",
       "user",
       "userData",
+      "userAccount",
     ];
     keysToRemove.forEach((key) => localStorage.removeItem(key));
-    // DO NOT remove "userAccount" so signup persists
+    // Do NOT remove "userAccounts" so all registered users stay saved
     return { success: true };
   } catch (err) {
     console.error("logoutUser error:", err);
@@ -122,7 +125,7 @@ export const isAuthenticated = () => {
   );
 };
 
-// Get current display user (for header/dashboard)
+// Get current display user (for dashboard, header, etc.)
 export const getCurrentUser = () => {
   try {
     return JSON.parse(localStorage.getItem("user") || "null");
@@ -131,28 +134,44 @@ export const getCurrentUser = () => {
   }
 };
 
-// Optional: update profile (used by Profile page)
+// Optional: update profile data and sync with current account
 export const updateUserProfile = (profileData) => {
   try {
-    const account = JSON.parse(localStorage.getItem("userAccount") || "null");
-    if (!account) {
+    const raw = localStorage.getItem("userAccounts");
+    const accounts = raw ? JSON.parse(raw) : [];
+    const current = JSON.parse(localStorage.getItem("userAccount") || "null");
+
+    if (!current) {
       return { success: false, message: "No user found." };
     }
 
-    const updatedAccount = {
-      ...account,
-      username: profileData.name || account.username,
-      email: profileData.email || account.email,
-    };
-
-    localStorage.setItem("userAccount", JSON.stringify(updatedAccount));
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        name: updatedAccount.username,
-        email: updatedAccount.email,
-      })
+    const updatedAccounts = accounts.map((acc) =>
+      acc.username === current.username
+        ? {
+            ...acc,
+            username: profileData.name || acc.username,
+            email: profileData.email || acc.email,
+          }
+        : acc
     );
+
+    const updatedAccount = updatedAccounts.find(
+      (acc) => acc.username === (profileData.name || current.username)
+    );
+
+    localStorage.setItem("userAccounts", JSON.stringify(updatedAccounts));
+    if (updatedAccount) {
+      localStorage.setItem("userAccount", JSON.stringify(updatedAccount));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          name: updatedAccount.username,
+          email: updatedAccount.email,
+        })
+      );
+    }
+
+    // store full profile separately (key can be userData_username on Profile side)
     localStorage.setItem("userData", JSON.stringify(profileData));
 
     return { success: true, message: "Profile updated." };
