@@ -1,97 +1,71 @@
+// src/pages/Dashboard.jsx
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import useLocalStorage from "../hooks/useLocalStorage";
+import "./Dashboard.css";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
-
-  // FIX: Remove 'isLoggedIn' key for proper logout
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    navigate("/");
-  };
+  const [user] = useLocalStorage("user", null);
 
   return (
-    <div style={styles.container}>
-      {/* Sidebar */}
-      <div style={styles.sidebar}>
-        <h2 style={styles.logo}>🎓 My Dashboard</h2>
-        <nav style={styles.nav}>
-          <Link to="/dashboard" style={styles.link}>
-            🏠 Home
-          </Link>
-          <Link to="/profile" style={styles.link}>
-            👤 Profile
-          </Link>
-          <Link to="/courses" style={styles.link}>
-            📘 Courses
-          </Link>
-          <Link to="/project" style={styles.link}>
-          🚀 Projects
-          </Link>
-        </nav>
-        <button onClick={handleLogout} style={styles.logoutBtn}>
-          🚪 Logout
-        </button>
-      </div>
+    <div className="dashboard-container">
+      {/* Top stats cards */}
+      <section className="dashboard-stats">
+        <div className="stat-card">
+          <div className="stat-icon">📚</div>
+          <div>
+            <h3>3</h3>
+            <p>Active Courses</p>
+          </div>
+        </div>
 
-      {/* Main Content */}
-      <div style={styles.main}>
-        <h1>Welcome to Your Dashboard</h1>
-        <p>
-          Use the sidebar to explore your profile, courses, and other sections.
-        </p>
-      </div>
+        <div className="stat-card">
+          <div className="stat-icon">🚀</div>
+          <div>
+            <h3>2</h3>
+            <p>Ongoing Projects</p>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon">📊</div>
+          <div>
+            <h3>78%</h3>
+            <p>Average Progress</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Hero welcome section */}
+      <section className="dashboard-welcome">
+        <div className="welcome-content">
+          <h1>
+            Welcome back{user && user.name ? `, ${user.name}` : ""} 👋
+          </h1>
+          <p>
+            Track your learning journey, manage sustainable projects, and keep an
+            eye on your performance in one clean dashboard.
+          </p>
+
+          <div className="welcome-actions">
+            <Link to="/courses" className="cta-btn primary">
+              🌿 Continue Courses
+            </Link>
+            <Link to="/projects" className="cta-btn secondary">
+              🚀 View Projects
+            </Link>
+          </div>
+        </div>
+
+        <div className="welcome-visual">
+          <div className="chart-placeholder">
+            <span>📈</span>
+            <div>Performance overview coming from the Performance page.</div>
+          </div>
+        </div>
+      </section>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    display: "flex",
-    minHeight: "100vh",
-    fontFamily: "Arial, sans-serif",
-  },
-  sidebar: {
-    width: "250px",
-    backgroundColor: "#0d2840",
-    color: "white",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-start",
-    padding: "20px",
-  },
-  logo: {
-    marginBottom: "30px",
-  },
-  nav: {
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    gap: "15px",
-  },
-  link: {
-    textDecoration: "none",
-    color: "white",
-    fontSize: "16px",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    transition: "background 0.3s",
-  },
-  logoutBtn: {
-    marginTop: "auto",
-    backgroundColor: "#ff4d4d",
-    color: "white",
-    border: "none",
-    padding: "10px 15px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    width: "100%",
-  },
-  main: {
-    flex: 1,
-    padding: "40px",
-    backgroundColor: "#f4f6f8",
-  },
 };
 
 export default Dashboard;

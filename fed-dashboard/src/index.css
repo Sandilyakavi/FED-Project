@@ -1,14 +1,124 @@
-* {
+/* src/index.css */
+
+/* Reset */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-}
-
-body {
-  background-color: var(--bg-color);
   margin: 0;
-  font-family: "Inter", sans-serif;
+  padding: 0;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base typography + dark base background */
+body {
+  margin: 0;
+  font-family: "Inter", "Poppins", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #020617; /* solid dark so no white edges */
+  color: var(--text-primary);
+}
+
+/* Root fills viewport so auth background can cover all */
+#root {
+  min-height: 100vh;
+}
+
+/* Light theme */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --surface: #f1f5f9;
+
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+
+  --accent: #3b82f6;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 10px 20px rgba(15, 23, 42, 0.08);
+  --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg-primary: #020617;
+  --bg-secondary: #020617;
+  --surface: #020617;
+
+  --text-primary: #e5e7eb;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+
+  --accent: #60a5fa;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+
+  --card-bg: #020617;
+  --border: #020617;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.5);
+  --shadow-md: 0 4px 6px rgba(15, 23, 42, 0.65);
+  --shadow-lg: 0 10px 20px rgba(15, 23, 42, 0.75);
+  --shadow-xl: 0 20px 40px rgba(15, 23, 42, 0.85);
+}
+
+/* Smooth transitions for theme switch */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Typography defaults */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+p {
+  margin-bottom: 0.75rem;
+}
+
+/* Links */
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }

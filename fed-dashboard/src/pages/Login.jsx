@@ -1,107 +1,231 @@
-import React, { useState, useEffect } from "react";
-import "./Login.css";
+// src/pages/Login.jsx
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser, registerUser } from "../utils/auth";
+import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
-
   const [isSignup, setIsSignup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     username: "",
+    email: "",
     password: "",
+    confirmPassword: "",
   });
   const [error, setError] = useState("");
 
-  // ✅ Check login state on mount
+  // Redirect if already logged in
   useEffect(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (loggedIn) navigate("/dashboard");
+    const loggedIn =
+      localStorage.getItem("isLoggedIn") === "true" ||
+      localStorage.getItem("isAuthenticated") === "true";
+    if (loggedIn) {
+      navigate("/dashboard");
+    }
   }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
-    const storedUser = JSON.parse(localStorage.getItem("userAccount"));
+    try {
+      if (isSignup) {
+        if (!formData.username || !formData.email || !formData.password) {
+          setError("Please fill all fields.");
+          return;
+        }
+        if (formData.password.length < 6) {
+          setError("Password must be at least 6 characters.");
+          return;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          setError("Passwords do not match.");
+          return;
+        }
 
-    if (isSignup) {
-      // Signup flow
-      if (!formData.username || !formData.password) {
-        setError("Please fill in all fields.");
-        return;
-      }
-      localStorage.setItem("userAccount", JSON.stringify(formData));
-      localStorage.setItem("isLoggedIn", "true");
-      setError("");
-      alert("Account created successfully 🎉");
-      navigate("/dashboard");
-    } else {
-      // Login flow
-      if (!storedUser) {
-        setError("No account found. Please sign up first.");
-        return;
-      }
-      if (
-        formData.username === storedUser.username &&
-        formData.password === storedUser.password
-      ) {
-        localStorage.setItem("isLoggedIn", "true");
-        setError("");
-        alert("Login successful ✅");
+        const result = registerUser(
+          formData.username,
+          formData.email,
+          formData.password
+        );
+
+        if (!result.success) {
+          setError(result.message);
+          return;
+        }
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ name: formData.username, email: formData.email })
+        );
         navigate("/dashboard");
       } else {
-        setError("Invalid username or password.");
+        if (!formData.username || !formData.password) {
+          setError("Please enter username and password.");
+          return;
+        }
+
+        const result = loginUser(formData.username, formData.password);
+
+        if (!result.success) {
+          setError(result.message);
+          return;
+        }
+
+        if (result.user) {
+          localStorage.setItem("user", JSON.stringify(result.user));
+        }
+        navigate("/dashboard");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    navigate("/");
+  const toggleMode = () => {
+    setIsSignup((prev) => !prev);
+    setError("");
+    setFormData({
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    });
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2>{isSignup ? "Sign Up" : "Login"}</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1>{isSignup ? "Create Account" : "Welcome Back"}</h1>
+          <p>
+            {isSignup
+              ? "Join the FED dashboard and track your learning."
+              : "Sign in to continue your dashboard journey."}
+          </p>
+          <div className="mode-pill">
+            <span className={!isSignup ? "active" : ""}>Login</span>
+            <span className={isSignup ? "active" : ""}>Signup</span>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-          />
-          <button type="submit">{isSignup ? "Sign Up" : "Login"}</button>
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="input-group">
+            <span className="input-label">Username</span>
+            <div className="input-shell">
+              <span className="input-icon">👤</span>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="Enter your username"
+                className="auth-input"
+                autoComplete="username"
+                required
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          {isSignup && (
+            <div className="input-group">
+              <span className="input-label">Email</span>
+              <div className="input-shell">
+                <span className="input-icon">✉️</span>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  className="auth-input"
+                  autoComplete="email"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="input-group">
+            <span className="input-label">Password</span>
+            <div className="input-shell">
+              <span className="input-icon">🔒</span>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder={
+                  isSignup ? "Create a password" : "Enter your password"
+                }
+                className="auth-input"
+                autoComplete={isSignup ? "new-password" : "current-password"}
+                required
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          {isSignup && (
+            <div className="input-group">
+              <span className="input-label">Confirm password</span>
+              <div className="input-shell">
+                <span className="input-icon">✅</span>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Re-enter your password"
+                  className="auth-input"
+                  autoComplete="new-password"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          )}
+
+          {error && <div className="error-message">{error}</div>}
+
+          <button type="submit" className="auth-submit" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <span className="spinner" />
+                {isSignup ? "Creating..." : "Signing in..."}
+              </>
+            ) : isSignup ? (
+              "Create Account"
+            ) : (
+              "Sign In"
+            )}
+          </button>
         </form>
 
-        {error && <p className="error">{error}</p>}
-
-        <p>
-          {isSignup ? "Already have an account?" : "New user?"}{" "}
-          <span
-            className="toggle"
-            onClick={() => {
-              setIsSignup(!isSignup);
-              setError("");
-              setFormData({ username: "", password: "" });
-            }}
-          >
-            {isSignup ? "Login" : "Sign up"}
-          </span>
-        </p>
+        <div className="auth-footer">
+          <p>
+            {isSignup ? "Already have an account?" : "New here?"}
+            <button
+              type="button"
+              className="switch-btn"
+              onClick={toggleMode}
+              disabled={isLoading}
+            >
+              {isSignup ? "Sign In" : "Create Account"}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
