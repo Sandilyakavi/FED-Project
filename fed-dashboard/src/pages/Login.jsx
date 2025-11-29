@@ -39,14 +39,24 @@ const Login = () => {
 
     try {
       if (isSignup) {
+        // Signup validation
         if (!formData.username || !formData.email || !formData.password) {
           setError("Please fill all fields.");
           return;
         }
+
+        if (!formData.email.endsWith("@gmail.com")) {
+          setError(
+            "Please enter a valid Gmail address (must end with @gmail.com)."
+          );
+          return;
+        }
+
         if (formData.password.length < 6) {
           setError("Password must be at least 6 characters.");
           return;
         }
+
         if (formData.password !== formData.confirmPassword) {
           setError("Passwords do not match.");
           return;
@@ -70,6 +80,7 @@ const Login = () => {
         );
         navigate("/dashboard");
       } else {
+        // Login validation
         if (!formData.username || !formData.password) {
           setError("Please enter username and password.");
           return;
@@ -148,7 +159,7 @@ const Login = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@example.com"
+                  placeholder="yourname@gmail.com"
                   className="auth-input"
                   autoComplete="email"
                   required
