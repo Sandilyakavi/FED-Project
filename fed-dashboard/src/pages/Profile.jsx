@@ -4,7 +4,20 @@ import useLocalStorage from "../hooks/useLocalStorage";
 import "./Profile.css";
 
 const Profile = () => {
-  const [storedProfile, setStoredProfile] = useLocalStorage("userData", null);
+  // Base account from auth
+  const baseAccount = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("userAccount") || "null");
+    } catch {
+      return null;
+    }
+  })();
+
+  const profileKey = baseAccount
+    ? `userData_${baseAccount.username}`
+    : "userData";
+
+  const [storedProfile, setStoredProfile] = useLocalStorage(profileKey, null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -21,27 +34,43 @@ const Profile = () => {
   const [originalData, setOriginalData] = useState(formData);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize from localStorage or defaults
+  // Initialize from localStorage or defaults based on current user
   useEffect(() => {
+    const displayUser = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("user") || "null");
+      } catch {
+        return null;
+      }
+    })();
+
     if (storedProfile) {
-      setFormData(storedProfile);
-      setOriginalData(storedProfile);
-    } else {
-      const defaultData = {
-        name: "Kavi Sandilya",
-        email: "kavi@example.com",
-        phone: "+91 9876543210",
-        role: "B.Tech Student",
-        bio: "Computer Science student exploring full-stack development and sustainable tech.",
-        joined: new Date().toLocaleDateString(),
-        coursesCompleted: 12,
-        totalHours: 156,
+      const merged = {
+        ...storedProfile,
+        name: displayUser?.name || storedProfile.name,
+        email: displayUser?.email || storedProfile.email,
       };
-      setFormData(defaultData);
-      setOriginalData(defaultData);
-      setStoredProfile(defaultData);
+      setFormData(merged);
+      setOriginalData(merged);
+      setStoredProfile(merged);
+      return;
     }
-  }, [storedProfile, setStoredProfile]);
+
+    const defaultData = {
+      name: displayUser?.name || baseAccount?.username || "Student",
+      email: displayUser?.email || baseAccount?.email || "student@example.com",
+      phone: "",
+      role: "B.Tech Student",
+      bio: "Computer Science student exploring full-stack development and sustainable tech.",
+      joined: new Date().toLocaleDateString(),
+      coursesCompleted: 0,
+      totalHours: 0,
+    };
+
+    setFormData(defaultData);
+    setOriginalData(defaultData);
+    setStoredProfile(defaultData);
+  }, [storedProfile, setStoredProfile, baseAccount]);
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -62,12 +91,35 @@ const Profile = () => {
     setIsSaving(true);
     setTimeout(() => {
       setStoredProfile(formData);
+
+      // also sync back to generic keys used elsewhere
+      try {
+        const updatedAccount = {
+          ...(baseAccount || {}),
+          username: formData.name || baseAccount?.username,
+          email: formData.email || baseAccount?.email,
+        };
+        if (baseAccount) {
+          localStorage.setItem("userAccount", JSON.stringify(updatedAccount));
+        }
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: updatedAccount.username,
+            email: updatedAccount.email,
+          })
+        );
+      } catch {
+        // ignore
+      }
+
       setEditing(false);
       setIsSaving(false);
     }, 800);
   };
 
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(originalData);
+  const isDirty =
+    JSON.stringify(formData) !== JSON.stringify(originalData);
 
   const initials =
     formData.name
@@ -75,7 +127,7 @@ const Profile = () => {
       .filter(Boolean)
       .slice(0, 2)
       .map((n) => n[0]?.toUpperCase())
-      .join("") || "KS";
+      .join("") || "ST";
 
   return (
     <div className="profile-page">
